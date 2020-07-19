@@ -23,7 +23,7 @@ public class AccountController {
     @Autowired
     private  FabrickRestConnectorAccountService fabrickRestConnectorAccountService;
 
-    @GetMapping(value = "/gbs/banking/v4.0/accounts/{accountId}", produces = "application/json")
+    @GetMapping(value = "/gbs/banking/v4.0/accounts/{accountId}/balance", produces = "application/json")
     @ApiOperation(value = "Retrieves the balance of a specific cash account.")
     @ResponseStatus(HttpStatus.OK)
     public AccountBalance getAccountBalance(@PathVariable Long accountId){

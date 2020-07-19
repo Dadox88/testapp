@@ -1,10 +1,8 @@
 package com.fabrick.testapp.ControllerTest;
 
 import com.fabrick.testapp.Application;
-import com.fabrick.testapp.model.operation.json.transfer.MoneyTransfersResponse;
 import com.fabrick.testapp.service.FabrickRestConnectorAccountService;
 import com.fabrick.testapp.service.FabrickRestConnectorTransferService;
-import com.fabrick.testapp.utility.JsonMapperUtil;
 import org.jboss.logging.Logger;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -17,13 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = Application.class)
@@ -40,9 +36,6 @@ public class TransferControllerTest {
     private WebApplicationContext wac;
 
     @Autowired
-    JsonMapperUtil jsonMapperUtil;
-
-    @Autowired
     FabrickRestConnectorAccountService fabrickRestConnectorAccountService;
 
     @Autowired
@@ -54,7 +47,7 @@ public class TransferControllerTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
-    String jsonReq ="{\n" +
+    String jsonData ="{\n" +
             "  \"creditor\": {\n" +
             "    \"name\": \"John Doe\",\n" +
             "    \"account\": {\n" +
@@ -98,19 +91,11 @@ public class TransferControllerTest {
     @Test
     public void moneyTransferTest() throws Exception
     {
-        MvcResult mvcResult =
-                mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/gbs/banking/v4.0/accounts/14537780/payments/money-transfers")
-                                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                                .content(jsonReq))
-                        .andReturn();
-
-        int status = mvcResult.getResponse().getStatus();
-        String str = mvcResult.getResponse().getContentAsString();
-        MoneyTransfersResponse moneyTransfersResponse =
-                jsonMapperUtil.mapFromJson(str, MoneyTransfersResponse.class);
-        assertEquals(500, status);
-        assertThat(moneyTransfersResponse.getStatus().equals("KO"));
-        logger.info(mvcResult.getResponse().getContentAsString());
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/gbs/banking/v4.0/accounts/14537780/payments/money-transfers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonData)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andReturn();
     }
 }

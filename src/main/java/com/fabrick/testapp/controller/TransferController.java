@@ -35,8 +35,6 @@ public class TransferController {
 
         if (moneyTransfersResponse != null) {
 
-            /*TODO persiste on db */
-
             return moneyTransfersResponse;
         } else {
             throw new TransferException();

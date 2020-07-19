@@ -1,11 +1,8 @@
 package com.fabrick.testapp.ControllerTest;
 
 import com.fabrick.testapp.Application;
-import com.fabrick.testapp.model.operation.json.balanceandmovments.AccountBalance;
-import com.fabrick.testapp.model.operation.json.balanceandmovments.AccountTransaction;
 import com.fabrick.testapp.service.FabrickRestConnectorAccountService;
 import com.fabrick.testapp.service.FabrickRestConnectorTransferService;
-import com.fabrick.testapp.utility.JsonMapperUtil;
 import org.jboss.logging.Logger;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -18,14 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = Application.class)
@@ -42,9 +38,6 @@ public class AccountControllerTest {
     private WebApplicationContext wac;
 
     @Autowired
-    JsonMapperUtil jsonMapperUtil;
-
-    @Autowired
     FabrickRestConnectorAccountService fabrickRestConnectorAccountService;
 
     @Autowired
@@ -59,40 +52,27 @@ public class AccountControllerTest {
 
     @Test
     public void getAccountBalanceTest() throws Exception {
-        String uri = "/api/gbs/banking/v4.0/accounts/14537780/balance";
-        MvcResult mvcResult =
-                mockMvc.perform(MockMvcRequestBuilders.get(uri)
-                        .accept(MediaType.APPLICATION_JSON_VALUE))
-                        .andReturn();
 
-        int status = mvcResult.getResponse().getStatus();
-        String content = mvcResult.getResponse().getContentAsString();
-        AccountBalance accountBalance = jsonMapperUtil.mapFromJson(content, AccountBalance.class);
-
-        assertEquals(200, status);
-        assertThat(accountBalance.getStatus().equals("OK"));
-       // assertThat(accountBalance.getPayload().getBalance()).isEqualTo(-256.32);
-      //  assertThat(accountBalance.getPayload().getAvailableBalance()).isEqualTo(-256.32);
-
-        logger.info(mvcResult.getResponse().getContentAsString());
+      mockMvc.perform(MockMvcRequestBuilders.get("/api/gbs/banking/v4.0/accounts/14537780/balance")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.payload.balance").value("3.51"))
+                .andExpect(jsonPath("$.payload.availableBalance").value("3.51"))
+                .andExpect(jsonPath("$.payload.currency").value("EUR"))
+                .andReturn();
     }
 
     @Test
     public void getAccountTransactionTest() throws Exception {
-        String uri = "/api/gbs/banking/v4.0/accounts/14537780/transactions?fromAccountingDate=2019-01-01&toAccountingDate=2019-12-01";
-        MvcResult mvcResult =
-                mockMvc.perform(MockMvcRequestBuilders.get(uri)
-                        .accept(MediaType.APPLICATION_JSON_VALUE))
-                        .andReturn();
 
-        int status = mvcResult.getResponse().getStatus();
-        String content = mvcResult.getResponse().getContentAsString();
-        AccountTransaction accountTransaction  = jsonMapperUtil.mapFromJson(content, AccountTransaction.class);
-        assertEquals(200, status);
-        assertThat(accountTransaction.getStatus().equals("OK"));
-        logger.info(mvcResult.getResponse().getContentAsString());
-
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/gbs/banking/v4.0/accounts/14537780/transactions?fromAccountingDate=2019-01-01&toAccountingDate=2019-12-01")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andReturn();
     }
-
 
 }
