@@ -2,11 +2,11 @@
 
 Start procedure BackEnd :
 
-cd testapp
+cd FabrickTestApp
 
 mvn clean install
 
-cd testapp
+cd FabrickTestApp
 
 mvn spring-boot:run
 
